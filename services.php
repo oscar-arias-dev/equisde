@@ -53,7 +53,7 @@ if (isset($_GET['fecha_inicio']) && isset($_GET['fecha_fin']) && isset($_GET['te
                     <?php echo htmlspecialchars($item['descripcion']); ?>
                     <?php echo htmlspecialchars($item['fecha']); ?>
                     <?php echo htmlspecialchars($item['idmodelo']); ?>
-                    <?php echo htmlspecialchars($item['modeloclave']); ?>
+                    <?php echo htmlspecialchars($item['modeloclave']) #en Tablulador actualizado excel viene como clave; ?>
                     <?php echo htmlspecialchars($item['modelotipo']); ?>
                     <?php echo htmlspecialchars($item['modelonombre']); ?>
                 </li>
