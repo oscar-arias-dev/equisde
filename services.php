@@ -1,4 +1,27 @@
 <?php
+require_once 'enums.php';
+function getValueByCodeAndType(string $clave, string $localforaneo, string $tipo) {
+    if ($clave === "" || $localforaneo === "") return json_encode(array('item_total' => 0, 'service_type' => $tipo, 'total' => (0)));
+    try {
+        $itemTotal = null;
+        $type = null;
+        if ($localforaneo === "FORANEO") {
+            $itemTotal = ClaveCostoForaneo::from($clave);
+            $type = ClaveCostoForaneo::type($tipo ?? "");
+        } else if ($localforaneo === "LOCAL") {
+            $itemTotal = ClaveCostoLocal::from($clave);
+            $type = ClaveCostoLocal::type($tipo ?? "");
+        }
+        if ($itemTotal === null) {
+            throw new ValueError("Enum case not found for the given input.");
+        }
+        return json_encode(array('item_total' => $itemTotal, 'service_type' => $type, 'total' => ($itemTotal + $type)));
+    } catch (ValueError $e) {
+        return 0;
+    }
+}
+?>
+<?php
 if (isset($_GET['fecha_inicio']) && isset($_GET['fecha_fin']) && isset($_GET['tecnico_nombre']) && isset($_GET['id_tecnico'])) {
     $fecha_inicio = $_GET['fecha_inicio'];
     $fecha_fin = $_GET['fecha_fin'];
@@ -16,7 +39,13 @@ if (isset($_GET['fecha_inicio']) && isset($_GET['fecha_fin']) && isset($_GET['te
     }
     curl_close($ch);
     $data = json_decode($response, true);
+    $totalDeTotales = 0;
     if ($data) {
+        foreach ($data as &$item) {
+            $jsoncito = json_decode(getValueByCodeAndType($item['modeloclave'] ?? "", $item['localforaneo'] ?? "", $item['tipo'] ?? ""), true);
+            $item['taco'] = $jsoncito;
+            $totalDeTotales +=$jsoncito['total'];
+        }
         $resultados = $data;
     } else {
         $resultados = "No se obtuvo información de la API.";
@@ -44,18 +73,21 @@ if (isset($_GET['fecha_inicio']) && isset($_GET['fecha_fin']) && isset($_GET['te
     <a href="index.php">Regresar</a>
 
     <h2>Resultados de la API</h2>
+    <h4>Total generado del técnico: <?php echo htmlspecialchars($totalDeTotales); ?></h4>
     <?php if (is_array($resultados)): ?>
         <ul>
             <?php foreach ($resultados as $item): ?>
                 <li>
+                    <?php echo htmlspecialchars($item['id']); ?> - 
                     <?php echo htmlspecialchars($item['localforaneo']); ?> - 
-                    <?php echo htmlspecialchars($item['tipo']); ?>
-                    <?php echo htmlspecialchars($item['descripcion']); ?>
-                    <?php echo htmlspecialchars($item['fecha']); ?>
-                    <?php echo htmlspecialchars($item['idmodelo']); ?>
-                    <?php echo htmlspecialchars($item['modeloclave']) #en Tablulador actualizado excel viene como clave; ?>
-                    <?php echo htmlspecialchars($item['modelotipo']); ?>
-                    <?php echo htmlspecialchars($item['modelonombre']); ?>
+                    <?php echo htmlspecialchars($item['tipo']); ?> -
+                    <?php echo htmlspecialchars($item['descripcion']); ?> -
+                    <?php echo htmlspecialchars($item['fecha']); ?> -
+                    <?php echo htmlspecialchars($item['idmodelo']); ?> -
+                    <?php echo htmlspecialchars($item['modeloclave']) #en Tablulador actualizado excel viene como clave; ?> -
+                    <?php echo htmlspecialchars($item['modelotipo']); ?> -
+                    <?php echo htmlspecialchars($item['modelonombre']); ?> -
+                    <?php echo htmlspecialchars($item['taco']['item_total']); ?>
                 </li>
             <?php endforeach; ?>
         </ul>
