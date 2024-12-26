@@ -152,6 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <td><?php echo htmlspecialchars($item['tecnico_nombre']); ?></td>
                             <td><?php echo htmlspecialchars($item['tecnico_ciudad']); ?></td>
                             <td><?php echo htmlspecialchars($item['tecnico_sede']); ?></td>
+                            <td><?php echo htmlspecialchars($item['tecnico_distribuidor']); ?></td>
                             <td><?php echo htmlspecialchars($item['tecnico_proveedor']); ?></td>
                             <td><?php echo htmlspecialchars($item['tecnico_estatus']); ?></td>
                             <td>
