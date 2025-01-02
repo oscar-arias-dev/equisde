@@ -1,15 +1,15 @@
 <?php
 require_once 'enums.php';
 function getValueByCodeAndType(string $clave, string $localforaneo, string $tipo) {
-    if ($clave === "" || $localforaneo === "") return json_encode(array('item_total' => 0, 'service_type' => $tipo, 'total' => (0)));
+    if ($localforaneo === "") return json_encode(array('item_total' => 0, 'service_type' => $tipo, 'total' => (0)));
     try {
         $itemTotal = null;
         $type = null;
         if ($localforaneo === "FORANEO") {
-            $itemTotal = ClaveCostoForaneo::from($clave);
+            $itemTotal = !$clave ? 0 : ClaveCostoForaneo::from($clave);
             $type = ClaveCostoForaneo::type($tipo ?? "");
         } else if ($localforaneo === "LOCAL") {
-            $itemTotal = ClaveCostoLocal::from($clave);
+            $itemTotal = !$clave ? 0 : ClaveCostoLocal::from($clave);
             $type = ClaveCostoLocal::type($tipo ?? "");
         }
         if ($itemTotal === null) {
@@ -30,7 +30,8 @@ if (isset($_GET['fecha_inicio']) && isset($_GET['fecha_fin']) && isset($_GET['te
 
     $fecha_inicio_codificada = urlencode($fecha_inicio);
     $fecha_fin_codificada = urlencode($fecha_fin);
-    $api_url = "https://secure.tecnomotum.com/srmotum/Apis/GetServiciosST?DateIni=$fecha_inicio_codificada&DateFin=$fecha_fin_codificada&idTec=$id_tecnico&param=";
+    $api_url = "https://secure.tecnomotum.com/srmotum/Apis/GetServiciosST?DateIni=$fecha_inicio_codificada&DateFin=$fecha_fin_codificada&idTec=$id_tecnico";
+    // echo $api_url;
     $ch = curl_init($api_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
@@ -42,11 +43,12 @@ if (isset($_GET['fecha_inicio']) && isset($_GET['fecha_fin']) && isset($_GET['te
     $totalDeTotales = 0;
     if ($data) {
         foreach ($data as &$item) {
-            $jsoncito = json_decode(getValueByCodeAndType($item['modeloclave'] ?? "", $item['localforaneo'] ?? "", $item['tipo'] ?? ""), true);
-            $item['taco'] = $jsoncito;
-            $totalDeTotales +=$jsoncito['total'];
+            $json = json_decode(getValueByCodeAndType($item['modeloclave'] ?? "", $item['localforaneo'] ?? "", $item['tipo'] ?? ""), true);
+            $item['info'] = $json;
+            $totalDeTotales +=$json['total'];
         }
-        $resultados = $data;
+        $resultados = array_map("unserialize", array_unique(array_map("serialize", $data)));
+        // var_dump(json_encode($resultados));
     } else {
         $resultados = "No se obtuvo información de la API.";
     }
@@ -189,7 +191,7 @@ if (isset($_GET['fecha_inicio']) && isset($_GET['fecha_fin']) && isset($_GET['te
                             <td><?php echo htmlspecialchars($item['modeloclave']); ?></td>
                             <td><?php echo htmlspecialchars($item['modelotipo']); ?></td>
                             <td><?php echo htmlspecialchars($item['modelonombre']); ?></td>
-                            <td>$<?php echo htmlspecialchars($item['taco']['item_total']); ?></td>
+                            <td>$<?php echo htmlspecialchars($item['info']['item_total']); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

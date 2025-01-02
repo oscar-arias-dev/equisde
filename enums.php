@@ -772,6 +772,7 @@ class claveCostoForaneo {
         if ($serviceType === "RESCATE NOCTURNO") return 600;
         if ($serviceType === "RESCATE") return 300;
         if ($serviceType === "GUARDIA") return 150;
+        if ($serviceType === "INSTALACION") return 200;
         if ($serviceType === "REINSTALACION") return 200;
         if ($serviceType === "BAJA") return 100;
         if ($serviceType === "" || !$serviceType) return 0;

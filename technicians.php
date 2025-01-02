@@ -137,6 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <table>
                 <thead>
                     <tr>
+                        <th>ID técnico</th>
                         <th>Técnico</th>
                         <th>Ciudad</th>
                         <th>Sede</th>
@@ -149,6 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <tbody>
                     <?php foreach ($resultados as $item): ?>
                         <tr>
+                            <td><?php echo htmlspecialchars($item['id_tecnico']); ?></td>
                             <td><?php echo htmlspecialchars($item['tecnico_nombre']); ?></td>
                             <td><?php echo htmlspecialchars($item['tecnico_ciudad']); ?></td>
                             <td><?php echo htmlspecialchars($item['tecnico_sede']); ?></td>
